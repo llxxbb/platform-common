@@ -1,7 +1,10 @@
 package access
 
 import (
+	"fmt"
+
 	"gitlab.cdel.local/platform/go/platform-common/def"
+	"go.uber.org/zap"
 )
 
 type ParaOut[T any] struct {
@@ -12,8 +15,8 @@ type ParaOut[T any] struct {
 	WarnMsg string        `json:"warnMsg"` // 警告信息。
 }
 
-type BizData interface {
-	GetBizData() (any error)
+type BizDataI interface {
+	GetBizData() (any, *def.CustomError)
 }
 
 /**
@@ -25,22 +28,25 @@ type BizData interface {
  * @param <T>    ：What Type would you like to return
  * @return : take the result into {@link ParaOut}
  */
-// func GetResult[T any](bd BizData, errMsg string) ParaOut[T]{
-//     t, e := bd.GetBizData()
-// 	if e != nil {
-//         log.warn("eCode:{}, eType:{}, eMsg:{}, {}", e.code, e.eType, e.getMessage(), errMsg, e);
-//         return GetErrorResult(e.code, e.eType, e.getMessage());
-// 	}
-//     try {
-//     } catch (PlatformException e) {
-//         log.warn("eCode:{}, eType:{}, eMsg:{}, {}", e.code, e.eType, e.getMessage(), errMsg, e);
-//         return ParaOut.getErrorResult(e.code, e.eType, e.getMessage());
-//     } catch (Throwable throwable) {
-//         log.error("{}", errMsg, throwable);
-//         return ParaOut.getErrorResult(UNKNOWN_C, ErrorType.SYS, UNKNOWN_M);
-//     }
-//     return getSuccessResult(t);
-// }
+func GetResult[T any](bd func() (T, *def.CustomError), errMsg string) ParaOut[T] {
+	t, e := bd()
+	if e != nil {
+		e.Msg += errMsg
+		eMsg := fmt.Sprintf("ErrorType: %s, Code: %d, Msg: %s", e.ErrType, e.Code, e.Msg)
+		switch e.ErrType {
+		case def.ET_BIZ:
+			zap.L().Warn(eMsg)
+		case def.ET_ENV:
+			zap.L().Warn(eMsg)
+		case def.ET_COM:
+			zap.L().Warn(eMsg)
+		default:
+			zap.L().Error(fmt.Sprintf("ErrorType: %s, Code: %d, Msg: %s", e.ErrType, e.Code, e.Msg))
+		}
+		return GetErrorResult(e.Code, e.ErrType, e.Msg, e.Context.(T))
+	}
+	return GetSuccessResult(t)
+}
 
 func GetSuccessResult[T any](v T) ParaOut[T] {
 	result := ParaOut[T]{}
@@ -49,12 +55,12 @@ func GetSuccessResult[T any](v T) ParaOut[T] {
 	return result
 }
 
-func GetErrorResultED[T any](e def.ErrorDefine, et def.ErrorType, d T) ParaOut[T] {
+func GetErrorResultE[T any](e def.CustomError) ParaOut[T] {
 	result := ParaOut[T]{}
 	result.State = e.Code
-	result.ErrType = et
+	result.ErrType = e.ErrType
 	result.ErrMsg = e.Msg
-	result.Data = d
+	result.Data = e.Context.(T)
 	return result
 }
 

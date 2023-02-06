@@ -7,14 +7,35 @@ import (
 	"gitlab.cdel.local/platform/go/platform-common/def"
 )
 
+func TestGetResult_Ok(t *testing.T) {
+	f := func() (any, *def.CustomError) { return "lxb", nil }
+	rtn := GetResult(f, "")
+	assert.Equal(t, 0, rtn.State)
+	assert.Equal(t, "lxb", rtn.Data)
+}
+func TestGetResult_Err(t *testing.T) {
+	f := func() (any, *def.CustomError) {
+		e := def.CustomError{
+			ErrorDefine: def.ErrorDefine{Code: 5, Msg: "my err"}, ErrType: def.ET_BIZ, Context: "lxb",
+		}
+		return "", &e
+	}
+	rtn := GetResult(f, "")
+	assert.Equal(t, 5, rtn.State)
+	assert.Equal(t, def.ErrorType("BIZ"), rtn.ErrType)
+	assert.Equal(t, "my err", rtn.ErrMsg)
+	assert.Equal(t, "lxb", rtn.Data)
+}
+
 func TestGetSuccessResult(t *testing.T) {
 	rtn := GetSuccessResult[any]("lxb")
 	assert.Equal(t, 0, rtn.State)
 	assert.Equal(t, "lxb", rtn.Data)
 }
 
-func TestErrorResultED(t *testing.T) {
-	rtn := GetErrorResultED[any](def.E_VERIFY, "lxb", "my test")
+func TestErrorResultE(t *testing.T) {
+	ce := def.CustomError{ErrorDefine: def.E_VERIFY, ErrType: "lxb", Context: "my test"}
+	rtn := GetErrorResultE[any](ce)
 	assert.Equal(t, def.E_VERIFY.Code, rtn.State)
 	assert.Equal(t, def.E_VERIFY.Msg, rtn.ErrMsg)
 	assert.Equal(t, def.ErrorType("lxb"), rtn.ErrType)

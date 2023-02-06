@@ -3,6 +3,7 @@ package def
 type CustomError struct {
 	ErrorDefine
 	ErrType ErrorType
+	Context any
 }
 
 type ErrorDefine struct {
