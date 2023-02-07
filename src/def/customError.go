@@ -1,14 +1,24 @@
 package def
 
+type ErrorDefine struct {
+	Code int
+	Msg  string
+}
 type CustomError struct {
 	ErrorDefine
 	ErrType ErrorType
 	Context any
 }
 
-type ErrorDefine struct {
-	Code int
-	Msg  string
+func NewCustomError(et ErrorType, code int, msg string, context any) CustomError {
+	return CustomError{
+		ErrorDefine: ErrorDefine{
+			Code: code,
+			Msg:  msg,
+		},
+		ErrType: et,
+		Context: context,
+	}
 }
 
 // call out err

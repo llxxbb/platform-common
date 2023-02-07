@@ -13,6 +13,13 @@ func TestGetResult_Ok(t *testing.T) {
 	assert.Equal(t, 0, rtn.State)
 	assert.Equal(t, "lxb", rtn.Data)
 }
+func TestGetResult_NoFun(t *testing.T) {
+	rtn := GetResult(nil, "")
+	assert.Equal(t, def.E_UNKNOWN.Code, rtn.State)
+	assert.Equal(t, def.ErrorType("SYS"), rtn.ErrType)
+	assert.Equal(t, def.E_UNKNOWN.Msg+"The param [fn] doesn't provide", rtn.ErrMsg)
+	assert.Equal(t, nil, rtn.Data)
+}
 func TestGetResult_Err(t *testing.T) {
 	f := func() (any, *def.CustomError) {
 		e := def.CustomError{
@@ -28,24 +35,16 @@ func TestGetResult_Err(t *testing.T) {
 }
 
 func TestGetSuccessResult(t *testing.T) {
-	rtn := GetSuccessResult[any]("lxb")
+	rtn := GetSuccessResult("lxb")
 	assert.Equal(t, 0, rtn.State)
 	assert.Equal(t, "lxb", rtn.Data)
 }
 
-func TestErrorResultE(t *testing.T) {
+func TestErrorResult(t *testing.T) {
 	ce := def.CustomError{ErrorDefine: def.E_VERIFY, ErrType: "lxb", Context: "my test"}
-	rtn := GetErrorResultE[any](ce)
+	rtn := GetErrorResult(ce)
 	assert.Equal(t, def.E_VERIFY.Code, rtn.State)
 	assert.Equal(t, def.E_VERIFY.Msg, rtn.ErrMsg)
 	assert.Equal(t, def.ErrorType("lxb"), rtn.ErrType)
-	assert.Equal(t, "my test", rtn.Data)
-}
-
-func TestErrorResult(t *testing.T) {
-	rtn := GetErrorResult[any](5, "hello", "lxb", "my test")
-	assert.Equal(t, 5, rtn.State)
-	assert.Equal(t, def.ErrorType("hello"), rtn.ErrType)
-	assert.Equal(t, "lxb", rtn.ErrMsg)
 	assert.Equal(t, "my test", rtn.Data)
 }
