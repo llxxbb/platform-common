@@ -1,22 +1,22 @@
 package old
 
-type ServiceResult[T any] struct {
+type ServiceResult struct {
 	Success   bool   `json:"success"`
 	ErrorCode string `json:"errorCode"`
 	ErrorMsg  string `json:"errorMsg"`
 	Retry     bool   `json:"retry"`
-	Result    T      `json:"result"`
+	Result    any    `json:"result"`
 }
 
-func GetSuccess[T any](v T) ServiceResult[T] {
-	result := ServiceResult[T]{}
+func GetSuccess(v any) ServiceResult {
+	result := ServiceResult{}
 	result.Result = v
 	result.Success = true
 	return result
 }
 
-func GetFailure[T any](errorCode string, msg string) ServiceResult[T] {
-	result := ServiceResult[T]{}
+func GetFailure(errorCode string, msg string) ServiceResult {
+	result := ServiceResult{}
 	result.ErrorCode = errorCode
 	result.ErrorMsg = msg
 	return result
