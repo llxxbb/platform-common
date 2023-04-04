@@ -1,7 +1,7 @@
 package old
 
-type Request struct {
-	Params       any    `json:"params"`
+type Request[T any] struct {
+	Params       T      `json:"params"`
 	Domain       string `json:"domain"`
 	ResourcePath string `json:"resourcePath"`
 	Platform     string `json:"platform"`

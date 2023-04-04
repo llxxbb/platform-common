@@ -9,7 +9,7 @@ import (
 
 type ParaOutError def.CustomError
 
-func (e *ParaOutError) ToParaOut() ParaOut {
+func (e *ParaOutError) ToParaOut() ParaOut[any] {
 	eMsg := fmt.Sprintf("ErrorType: %s, Code: %d, Msg: %s", e.ErrType, e.Code, e.Msg)
 	switch e.ErrType {
 	case def.ET_BIZ:
@@ -21,7 +21,7 @@ func (e *ParaOutError) ToParaOut() ParaOut {
 	case def.ET_SYS:
 		zap.L().Error(eMsg)
 	}
-	result := ParaOut{}
+	result := ParaOut[any]{}
 	result.State = e.Code
 	result.ErrType = e.ErrType
 	result.ErrMsg = e.Msg

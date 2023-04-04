@@ -4,8 +4,8 @@ import (
 	"gitlab.cdel.local/platform/go/platform-common/def"
 )
 
-type ParaIn struct {
-	Data     any               `json:"data"`     // 要传送的业务数据
+type ParaIn[T any] struct {
+	Data     T                 `json:"data"`     // 要传送的业务数据
 	TraceId  string            `json:"traceId"`  // 用于链路分析
 	PTraceId string            `json:"pTraceId"` // 父 traceId，用于解决跟踪分叉问题
 	RefId    string            `json:"refId"`    // 关联业务的ID,用于审计
@@ -14,13 +14,13 @@ type ParaIn struct {
 	Time     string            `json:"time"`     // 发起端的调用时间, Long 型的字符串
 }
 
-func CreateFrom(data any) ParaIn {
-	rtn := ParaIn{}
+func CreateFrom[T any](data T) ParaIn[T] {
+	rtn := ParaIn[T]{}
 	rtn.Data = data
 	return rtn
 }
 
-func (para *ParaIn) Verify() *def.CustomError {
+func (para *ParaIn[T]) Verify() *def.CustomError {
 	return para.VerifyF(nil)
 }
 
@@ -28,8 +28,14 @@ func (para *ParaIn) Verify() *def.CustomError {
  * Used to verify imputed parameter
  * If verified ok then return nil, otherwise return {@link ParaOut}
  */
-func (para *ParaIn) VerifyF(verifier func() *def.CustomError) *def.CustomError {
-	if para == nil || para.Data == nil {
+func (para *ParaIn[T]) VerifyF(verifier func() *def.CustomError) *def.CustomError {
+	var data any
+	if para == nil {
+		data = nil
+	} else {
+		data = para.Data
+	}
+	if data == nil {
 		return &def.CustomError{
 			ErrorDefine: def.ErrorDefine{
 				Code: def.E_VERIFY.Code,
