@@ -1,5 +1,7 @@
 package def
 
+import "fmt"
+
 type ErrorDefine struct {
 	Code int
 	Msg  string
@@ -8,6 +10,10 @@ type CustomError struct {
 	ErrorDefine
 	ErrType ErrorType
 	Context any
+}
+
+func (e *CustomError) Error() string {
+	return fmt.Sprintf("type: %s, code: %d, msg: %s", e.ErrType, e.Code, e.Msg)
 }
 
 func NewCustomError(et ErrorType, code int, msg string, context any) CustomError {
