@@ -20,14 +20,14 @@ type BizDataI interface {
  * Execute the fun and automatically the result whether an Exception in there.
  * all so with log.
  */
-func GetResult(fn func() (any, *def.CustomError), errMsg string) ParaOut[any] {
+func GetResult[T any](fn func() (T, *def.CustomError), errMsg string) ParaOut[T] {
 	if fn == nil {
 		msg := def.E_UNKNOWN.Msg + "The param [fn] doesn't provide"
-		return GetErrorResultD(def.ET_SYS, def.E_UNKNOWN.Code, msg, nil)
+		return GetErrorResultD[T](def.ET_SYS, def.E_UNKNOWN.Code, msg, nil)
 	}
 	t, e := fn()
 	if e != nil {
-		return GetErrorResult(*e)
+		return GetErrorResult[T](*e)
 	}
 	return GetSuccessResult(t)
 }
@@ -39,12 +39,12 @@ func GetSuccessResult[T any](v T) ParaOut[T] {
 	return result
 }
 
-func GetErrorResult(e def.CustomError) ParaOut[any] {
+func GetErrorResult[T any](e def.CustomError) ParaOut[T] {
 	myE := ParaOutError(e)
-	return myE.ToParaOut()
+	return ConvertError[T](&myE)
 }
 
-func GetErrorResultD(et def.ErrorType, code int, msg string, context any) ParaOut[any] {
+func GetErrorResultD[T any](et def.ErrorType, code int, msg string, context any) ParaOut[T] {
 	e := def.NewCustomError(et, code, msg, context)
-	return GetErrorResult(e)
+	return GetErrorResult[T](e)
 }
