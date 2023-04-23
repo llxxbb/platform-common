@@ -9,7 +9,7 @@ import (
 
 type ParaOutError def.CustomError
 
-func (e *ParaOutError) ToParaOut() ParaOut[any] {
+func (e *ParaOutError) ToParaOut() *ParaOut[any] {
 	eMsg := fmt.Sprintf("ErrorType: %s, Code: %d, Msg: %s", e.ErrType, e.Code, e.Msg)
 	switch e.ErrType {
 	case def.ET_BIZ:
@@ -26,10 +26,10 @@ func (e *ParaOutError) ToParaOut() ParaOut[any] {
 	result.ErrType = e.ErrType
 	result.ErrMsg = e.Msg
 	result.Data = e.Context
-	return result
+	return &result
 }
 
-func ConvertError[T any](e *ParaOutError) ParaOut[T] {
+func ConvertError[T any](e *ParaOutError) *ParaOut[T] {
 	eMsg := fmt.Sprintf("ErrorType: %s, Code: %d, Msg: %s", e.ErrType, e.Code, e.Msg)
 	switch e.ErrType {
 	case def.ET_BIZ:
@@ -45,15 +45,15 @@ func ConvertError[T any](e *ParaOutError) ParaOut[T] {
 	result.State = e.Code
 	result.ErrType = e.ErrType
 	result.ErrMsg = e.Msg
-	return result
+	return &result
 }
 
 // SameError 进行类型转换但不改变错误信息。
-func SameError[I any, O any](in ParaOut[I]) ParaOut[O] {
+func SameError[I any, O any](in *ParaOut[I]) *ParaOut[O] {
 	result := ParaOut[O]{}
 	result.State = in.State
 	result.ErrType = in.ErrType
 	result.ErrMsg = in.ErrMsg
 	result.WarnMsg = in.WarnMsg
-	return result
+	return &result
 }
