@@ -47,3 +47,13 @@ func ConvertError[T any](e *ParaOutError) ParaOut[T] {
 	result.ErrMsg = e.Msg
 	return result
 }
+
+// SameError 进行类型转换但不改变错误信息。
+func SameError[I any, O any](in ParaOut[I]) ParaOut[O] {
+	result := ParaOut[O]{}
+	result.State = in.State
+	result.ErrType = in.ErrType
+	result.ErrMsg = in.ErrMsg
+	result.WarnMsg = in.WarnMsg
+	return result
+}
