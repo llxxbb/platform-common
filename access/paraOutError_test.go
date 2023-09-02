@@ -9,7 +9,7 @@ import (
 
 func TestConvert(t *testing.T) {
 	e := def.NewCustomError(def.ET_ENV, 123, "hello", nil)
-	pe := ParaOutError(e)
+	pe := ParaOutError(*e)
 	rtn := pe.ToParaOut()
 	assert.Equal(t, def.ET_ENV, rtn.ErrType)
 	assert.Equal(t, 123, rtn.State)

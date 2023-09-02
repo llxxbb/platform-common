@@ -12,6 +12,6 @@ func TestCustomError(t *testing.T) {
 	assert.Equal(t, 123, ce.Code)
 	assert.Equal(t, "hello", ce.Msg)
 	assert.Equal(t, "lxb", ce.Context)
-	var e error = &ce
+	var e error = ce
 	assert.Equal(t, "type: COM, code: 123, msg: hello", e.Error())
 }

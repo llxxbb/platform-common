@@ -16,18 +16,18 @@ type BizDataI interface {
 	GetBizData() (any, *def.CustomError)
 }
 
-/**
- * Execute the fun and automatically the result whether an Exception in there.
- * all so with log.
- */
-func GetResult[T any](fn func() (T, *def.CustomError), errMsg string) *ParaOut[T] {
+// GetResult
+//
+//	execute the fun and automatically the result whether an Exception in there.
+//	all so with log.
+func GetResult[T any](fn func() (T, *def.CustomError)) *ParaOut[T] {
 	if fn == nil {
 		msg := def.E_UNKNOWN.Msg + "The param [fn] doesn't provide"
 		return GetErrorResultD[T](def.ET_SYS, def.E_UNKNOWN.Code, msg, nil)
 	}
 	t, e := fn()
 	if e != nil {
-		return GetErrorResult[T](*e)
+		return GetErrorResult[T](e)
 	}
 	return GetSuccessResult(t)
 }
@@ -39,8 +39,8 @@ func GetSuccessResult[T any](v T) *ParaOut[T] {
 	return &result
 }
 
-func GetErrorResult[T any](e def.CustomError) *ParaOut[T] {
-	myE := ParaOutError(e)
+func GetErrorResult[T any](e *def.CustomError) *ParaOut[T] {
+	myE := ParaOutError(*e)
 	return ConvertError[T](&myE)
 }
 
