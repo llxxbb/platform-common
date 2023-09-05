@@ -35,15 +35,17 @@ func (e *ParaOutError) ToParaOut() *ParaOut[any] {
 
 func ConvertError[T any](e *ParaOutError) *ParaOut[T] {
 	eMsg := fmt.Sprintf("ErrorType: %s, Code: %d, Msg: %s", e.ErrType, e.Code, e.Msg)
-	switch e.ErrType {
-	case def.ET_BIZ:
-		zap.L().Warn(eMsg)
-	case def.ET_ENV:
-		zap.L().Warn(eMsg)
-	case def.ET_COM:
-		zap.L().Warn(eMsg)
-	case def.ET_SYS:
-		zap.L().Error(eMsg)
+	if CustomErrorLogOut {
+		switch e.ErrType {
+		case def.ET_BIZ:
+			zap.L().Warn(eMsg)
+		case def.ET_ENV:
+			zap.L().Warn(eMsg)
+		case def.ET_COM:
+			zap.L().Warn(eMsg)
+		case def.ET_SYS:
+			zap.L().Error(eMsg)
+		}
 	}
 	result := ParaOut[T]{}
 	result.State = e.Code
