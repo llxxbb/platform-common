@@ -7,19 +7,23 @@ import (
 	"go.uber.org/zap"
 )
 
+var CustomErrorLogOut = false
+
 type ParaOutError def.CustomError
 
 func (e *ParaOutError) ToParaOut() *ParaOut[any] {
 	eMsg := fmt.Sprintf("ErrorType: %s, Code: %d, Msg: %s", e.ErrType, e.Code, e.Msg)
-	switch e.ErrType {
-	case def.ET_BIZ:
-		zap.L().Warn(eMsg)
-	case def.ET_ENV:
-		zap.L().Warn(eMsg)
-	case def.ET_COM:
-		zap.L().Warn(eMsg)
-	case def.ET_SYS:
-		zap.L().Error(eMsg)
+	if CustomErrorLogOut {
+		switch e.ErrType {
+		case def.ET_BIZ:
+			zap.L().Warn(eMsg)
+		case def.ET_ENV:
+			zap.L().Warn(eMsg)
+		case def.ET_COM:
+			zap.L().Warn(eMsg)
+		case def.ET_SYS:
+			zap.L().Error(eMsg)
+		}
 	}
 	result := ParaOut[any]{}
 	result.State = e.Code
