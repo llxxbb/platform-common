@@ -33,6 +33,13 @@ func TestGetResult_Err(t *testing.T) {
 	assert.Equal(t, "my err", rtn.ErrMsg)
 }
 
+func TestGetResultWithParam_Ok(t *testing.T) {
+	f := func(p string) (any, *def.CustomError) { return p, nil }
+	rtn := GetResultWithParam("hello", f)
+	assert.Equal(t, 0, rtn.State)
+	assert.Equal(t, "hello", rtn.Data)
+}
+
 func TestGetSuccessResult(t *testing.T) {
 	rtn := GetSuccessResult("lxb")
 	assert.Equal(t, 0, rtn.State)
