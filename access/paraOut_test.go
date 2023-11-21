@@ -1,6 +1,7 @@
 package access
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,6 +37,13 @@ func TestGetResult_Err(t *testing.T) {
 func TestGetResultWithParam_Ok(t *testing.T) {
 	f := func(p string) (any, *def.CustomError) { return p, nil }
 	rtn := GetResultWithParam("hello", f)
+	assert.Equal(t, 0, rtn.State)
+	assert.Equal(t, "hello", rtn.Data)
+}
+
+func TestGetResultByParamCtx_Ok(t *testing.T) {
+	f := func(c context.Context, p string) (any, *def.CustomError) { return p, nil }
+	rtn := GetResultByParaCtx(context.Background(), "hello", f)
 	assert.Equal(t, 0, rtn.State)
 	assert.Equal(t, "hello", rtn.Data)
 }
