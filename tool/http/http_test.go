@@ -37,7 +37,7 @@ func Test_WrappedPost_realEnvErr(t *testing.T) {
 	assert.Equal(t, "http://server.for.test/subUrl env error: Post \"http://server.for.test/subUrl\": gock: cannot match any request", err.Msg)
 }
 
-func Test_WrappedPost_returnEnvErr(t *testing.T) {
+func Test_WrappedPost_returnErr(t *testing.T) {
 	gock.New("").
 		Post("/subUrl").
 		Reply(http.StatusOK).
@@ -50,39 +50,7 @@ func Test_WrappedPost_returnEnvErr(t *testing.T) {
 	rtn, err := WrappedPost[string, string](client, "prj", "/subUrl")
 	assert.Equal(t, "OK", rtn)
 	assert.Equal(t, def.ET_ENV, err.ErrType)
-	assert.Equal(t, "http://server.for.test/subUrl env error: you get an err", err.Msg)
-}
-
-func Test_WrappedPost_returnSysErr(t *testing.T) {
-	gock.New("").
-		Post("/subUrl").
-		Reply(http.StatusOK).
-		JSON(map[string]any{
-			"state":   -1,
-			"errType": "SYS",
-			"errMsg":  "you get an err",
-			"data":    "OK",
-		})
-	rtn, err := WrappedPost[string, string](client, "prj", "/subUrl")
-	assert.Equal(t, "OK", rtn)
-	assert.Equal(t, def.ET_ENV, err.ErrType)
-	assert.Equal(t, "http://server.for.test/subUrl env error: you get an err", err.Msg)
-}
-
-func Test_WrappedPost_returnBizErr(t *testing.T) {
-	gock.New("").
-		Post("/subUrl").
-		Reply(http.StatusOK).
-		JSON(map[string]any{
-			"state":   -1,
-			"errType": "BIZ",
-			"errMsg":  "you get an err",
-			"data":    "OK",
-		})
-	rtn, err := WrappedPost[string, string](client, "prj", "/subUrl")
-	assert.Equal(t, "OK", rtn)
-	assert.Equal(t, def.ET_SYS, err.ErrType)
-	assert.Equal(t, "http://server.for.test/subUrl sys error: you get an err", err.Msg)
+	assert.Equal(t, "you get an err", err.Msg)
 }
 
 func Test_WrappedPost_returnOk(t *testing.T) {

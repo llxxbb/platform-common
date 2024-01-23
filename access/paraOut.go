@@ -13,6 +13,14 @@ type ParaOut[T any] struct {
 	WarnMsg string        `json:"warnMsg,omitempty"` // 警告信息。
 }
 
+func (p *ParaOut[T]) ToCustomError() *def.CustomError {
+	customError := def.NewCustomError(p.ErrType, p.State, p.ErrMsg, p.Data)
+	if p.WarnMsg != "" {
+		customError.Msg = p.WarnMsg
+	}
+	return customError
+}
+
 type BizDataI interface {
 	GetBizData() (any, *def.CustomError)
 }
