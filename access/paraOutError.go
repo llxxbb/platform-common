@@ -51,6 +51,9 @@ func ConvertError[T any](e *ParaOutError) *ParaOut[T] {
 	result.State = e.Code
 	result.ErrType = e.ErrType
 	result.ErrMsg = e.Msg
+	if e.Context != nil {
+		result.Data = e.Context.(T)
+	}
 	return &result
 }
 
