@@ -66,6 +66,9 @@ const (
 
 	UNKNOWN_C = -99
 	UNKNOWN_M = "undefined error: "
+
+	EXISTS_C = 11
+	EXISTS_M = "already exists."
 )
 
 // call out err
@@ -85,3 +88,4 @@ var E_VERIFY = ErrorDefine{VERIFY_C, VERIFY_M}
 var E_ENV = ErrorDefine{ENV_C, ENV_M}
 var E_SYS = ErrorDefine{SYS_C, SYS_M}
 var E_UNKNOWN = ErrorDefine{UNKNOWN_C, UNKNOWN_M}
+var E_EXISTS = ErrorDefine{EXISTS_C, EXISTS_M}
