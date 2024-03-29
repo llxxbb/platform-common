@@ -6,11 +6,12 @@ import (
 )
 
 type ParaOut[T any] struct {
-	State   int           `json:"state"`             // 等于0正常，小于0异常。大于0 警告
-	Data    T             `json:"data"`              // 返回的业务数据。
-	ErrType def.ErrorType `json:"errType,omitempty"` // 错误类类型，state < 0 时有意义。
-	ErrMsg  string        `json:"errMsg,omitempty"`  // 错误的具体信息，state < 0 时有意义。
-	WarnMsg string        `json:"warnMsg,omitempty"` // 警告信息。
+	State   int               `json:"state"`             // 等于0正常，小于0异常。大于0 警告
+	Data    T                 `json:"data"`              // 返回的业务数据。
+	Label   map[string]string `json:"label,omitempty"`   // 输出与业务无关的额外信息，如token控制
+	ErrType def.ErrorType     `json:"errType,omitempty"` // 错误类类型，state < 0 时有意义。
+	ErrMsg  string            `json:"errMsg,omitempty"`  // 错误的具体信息，state < 0 时有意义。
+	WarnMsg string            `json:"warnMsg,omitempty"` // 警告信息。
 }
 
 func (p *ParaOut[T]) ToCustomError() *def.CustomError {
