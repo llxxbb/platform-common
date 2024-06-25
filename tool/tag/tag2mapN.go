@@ -17,6 +17,9 @@ func ToMapN(obj any) (map[string]int, *def.CustomError) {
 	v := reflect.ValueOf(obj)
 	t := v.Type()
 	if t.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil, nil
+		}
 		v = v.Elem()
 		t = t.Elem()
 	}
@@ -29,16 +32,28 @@ func ToMapN(obj any) (map[string]int, *def.CustomError) {
 		if tag == "" {
 			continue
 		}
-		key, omitEmpty := isOmitEmpty(tag)
+		setting := getMapSetting(tag)
 		fV := v.Field(i)
 		fT := fV.Type().Name()
+		if setting.drillSub {
+			subMap, err := ToMapN(fV.Interface())
+			if err != nil {
+				return nil, err
+			}
+			if len(subMap) > 0 {
+				for k, v := range subMap {
+					rtn[k] = v
+				}
+			}
+			continue
+		}
 		switch fT {
 		case "int":
 			rValue := int(fV.Int())
-			if omitEmpty && rValue == 0 {
+			if setting.omit && rValue == 0 {
 				continue
 			}
-			rtn[key] = rValue
+			rtn[setting.key] = rValue
 		default:
 			msg := fmt.Sprintf("%s unsupported type: %s", def.SYS_M, fT)
 			zap.L().Error(msg)
@@ -51,12 +66,19 @@ func ToMapN(obj any) (map[string]int, *def.CustomError) {
 // FromMapN notice: para `remove` will remove from `mVal` after restored
 func FromMapN(mVal map[string]int, ins any, remove bool) *def.CustomError {
 	// check before process
-	if mVal == nil || len(mVal) == 0 {
+	if ins == nil || mVal == nil || len(mVal) == 0 {
 		return nil
 	}
 	// process ------------------------------
-	v := reflect.ValueOf(ins).Elem()
+	v := reflect.ValueOf(ins)
 	t := v.Type()
+	if t.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+		t = t.Elem()
+	}
 
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
@@ -64,8 +86,23 @@ func FromMapN(mVal map[string]int, ins any, remove bool) *def.CustomError {
 		if tag == "" {
 			continue
 		}
-		key, _ := isOmitEmpty(tag)
-		mV, ok := mVal[key]
+		setting := getMapSetting(tag)
+		if setting.drillSub {
+			subValue := v.Field(i)
+			if subValue.Kind() == reflect.Ptr {
+				if subValue.IsNil() {
+					subValue.Set(reflect.New(subValue.Type().Elem()))
+				}
+			} else if subValue.Kind() == reflect.Struct {
+				subValue = subValue.Addr()
+			}
+			err := FromMapN(mVal, subValue.Interface(), remove)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+		mV, ok := mVal[setting.key]
 		if !ok {
 			continue
 		}
@@ -81,7 +118,7 @@ func FromMapN(mVal map[string]int, ins any, remove bool) *def.CustomError {
 			return def.NewCustomError(def.ET_SYS, def.SYS_C, msg, nil)
 		}
 		if remove {
-			delete(mVal, key)
+			delete(mVal, setting.key)
 		}
 	}
 	return nil

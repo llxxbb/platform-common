@@ -6,7 +6,6 @@ import (
 	"go.uber.org/zap"
 	"reflect"
 	"strconv"
-	"strings"
 )
 
 var mapTag = "map"
@@ -18,6 +17,9 @@ func ToMap(obj any) (map[string]string, *def.CustomError) {
 	v := reflect.ValueOf(obj)
 	t := v.Type()
 	if t.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil, nil
+		}
 		v = v.Elem()
 		t = t.Elem()
 	}
@@ -30,28 +32,40 @@ func ToMap(obj any) (map[string]string, *def.CustomError) {
 		if tag == "" {
 			continue
 		}
-		key, omitEmpty := isOmitEmpty(tag)
+		setting := getMapSetting(tag)
 		fV := v.Field(i)
 		fT := fV.Type().Name()
+		if setting.drillSub {
+			subMap, err := ToMap(fV.Interface())
+			if err != nil {
+				return nil, err
+			}
+			if len(subMap) > 0 {
+				for k, v := range subMap {
+					data[k] = v
+				}
+			}
+			continue
+		}
 		switch fT {
 		case "string":
 			rValue := fV.Interface().(string)
-			if omitEmpty && rValue == "" {
+			if setting.omit && rValue == "" {
 				continue
 			}
-			data[key] = rValue
+			data[setting.key] = rValue
 		case "bool":
 			rValue := fV.Bool()
-			if omitEmpty && !rValue {
+			if setting.omit && !rValue {
 				continue
 			}
-			data[key] = strconv.FormatBool(rValue)
+			data[setting.key] = strconv.FormatBool(rValue)
 		case "int":
 			rValue := int(fV.Int())
-			if omitEmpty && rValue == 0 {
+			if setting.omit && rValue == 0 {
 				continue
 			}
-			data[key] = strconv.Itoa(rValue)
+			data[setting.key] = strconv.Itoa(rValue)
 		default:
 			msg := fmt.Sprintf("%s unsupported type: %s", def.SYS_M, fT)
 			zap.L().Error(msg)
@@ -61,27 +75,22 @@ func ToMap(obj any) (map[string]string, *def.CustomError) {
 	return data, nil
 }
 
-// return key and omitEmpty
-func isOmitEmpty(tag string) (string, bool) {
-	split := strings.Split(tag, ",")
-	omitEmpty := false
-	if len(split) > 1 {
-		if split[1] == "omitempty" {
-			omitEmpty = true
-		}
-	}
-	return split[0], omitEmpty
-}
-
 // FromMap notice: para `remove` will remove from `mVal` after restored
 func FromMap(mVal map[string]string, ins any, remove bool) *def.CustomError {
 	// check before process
-	if mVal == nil || len(mVal) == 0 {
+	if ins == nil || mVal == nil || len(mVal) == 0 {
 		return nil
 	}
 	// process ------------------------------
-	v := reflect.ValueOf(ins).Elem()
+	v := reflect.ValueOf(ins)
 	t := v.Type()
+	if t.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+		t = t.Elem()
+	}
 
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
@@ -89,8 +98,23 @@ func FromMap(mVal map[string]string, ins any, remove bool) *def.CustomError {
 		if tag == "" {
 			continue
 		}
-		key, _ := isOmitEmpty(tag)
-		mV, ok := mVal[key]
+		setting := getMapSetting(tag)
+		if setting.drillSub {
+			subValue := v.Field(i)
+			if subValue.Kind() == reflect.Ptr {
+				if subValue.IsNil() {
+					subValue.Set(reflect.New(subValue.Type().Elem()))
+				}
+			} else if subValue.Kind() == reflect.Struct {
+				subValue = subValue.Addr()
+			}
+			err := FromMap(mVal, subValue.Interface(), remove)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+		mV, ok := mVal[setting.key]
 		if !ok {
 			continue
 		}
@@ -111,7 +135,7 @@ func FromMap(mVal map[string]string, ins any, remove bool) *def.CustomError {
 			return def.NewCustomError(def.ET_SYS, def.SYS_C, msg, nil)
 		}
 		if remove {
-			delete(mVal, key)
+			delete(mVal, setting.key)
 		}
 	}
 	return nil

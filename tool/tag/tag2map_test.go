@@ -7,15 +7,17 @@ import (
 )
 
 type User struct {
-	Name  string `json:"name" map:"name"`
-	Age   int    `json:"age" mapN:"age"`
-	Male  bool   `json:"male" map:"male"`
-	Empty int    `json:"empty" map:"empty,omitempty"`
-	Value int    `json:"value" mapN:"value,omitempty"`
-	Sub
+	Name   string `json:"name" map:"name"`
+	Age    int    `json:"age" mapN:"age"`
+	Male   bool   `json:"male" map:"male"`
+	Empty  int    `json:"empty" map:"empty,omitempty"`
+	Value  int    `json:"value" mapN:"value,omitempty"`
+	Sub    `map:"sub,sub" mapN:"sub,sub"`
+	SubPtr *Sub `map:"subPtr,sub" mapN:"subPtr,sub"`
 }
 type Sub struct {
-	Hi string
+	Hi     string `json:"hi" map:"hi,omitempty"`
+	IntVal int    `json:"intVal" mapN:"intVal,omitempty"`
 }
 
 func Test_tag2map(t *testing.T) {
@@ -39,6 +41,7 @@ func Test_tag2map(t *testing.T) {
 	assert.Equal(t, 2, len(rMap))
 	_ = FromMapN(rMapN, &another, false)
 	assert.Equal(t, 2, len(rMap))
+	another.SubPtr = nil
 	assert.Equal(t, user, another)
 
 	another = User{}
@@ -46,5 +49,54 @@ func Test_tag2map(t *testing.T) {
 	assert.Equal(t, 0, len(rMap))
 	_ = FromMapN(rMapN, &another, true)
 	assert.Equal(t, 0, len(rMap))
+	another.SubPtr = nil
 	assert.Equal(t, user, another)
+}
+
+func Test_tag2map_structSub(t *testing.T) {
+	user := User{Name: "John Doe", Age: 30, Male: true, Value: 3, Sub: Sub{Hi: "hi", IntVal: 123}}
+	rMap, _ := ToMap(user)
+	rString := fmt.Sprint(rMap)
+	assert.Equal(t, "map[hi:hi male:true name:John Doe]", rString)
+
+	user = User{}
+	err := FromMap(rMap, &user, false)
+	assert.Nil(t, err)
+	assert.Equal(t, "hi", user.Hi)
+}
+
+func Test_tag2map_ptrSub(t *testing.T) {
+	user := User{Name: "John Doe", Age: 30, Male: true, Value: 3, SubPtr: &Sub{Hi: "hi", IntVal: 123}}
+	rMap, _ := ToMap(user)
+	rString := fmt.Sprint(rMap)
+	assert.Equal(t, "map[hi:hi male:true name:John Doe]", rString)
+
+	user = User{}
+	err := FromMap(rMap, &user, false)
+	assert.Nil(t, err)
+	assert.Equal(t, "hi", user.Hi)
+}
+
+func Test_tag2map_structSubN(t *testing.T) {
+	user := User{Name: "John Doe", Age: 30, Male: true, Value: 3, Sub: Sub{Hi: "hi", IntVal: 123}}
+	rMap, _ := ToMapN(user)
+	rString := fmt.Sprint(rMap)
+	assert.Equal(t, "map[age:30 intVal:123 value:3]", rString)
+
+	user = User{}
+	err := FromMapN(rMap, &user, false)
+	assert.Nil(t, err)
+	assert.Equal(t, 123, user.IntVal)
+}
+
+func Test_tag2map_ptrSubN(t *testing.T) {
+	user := User{Name: "John Doe", Age: 30, Male: true, Value: 3, SubPtr: &Sub{Hi: "hi", IntVal: 123}}
+	rMap, _ := ToMapN(user)
+	rString := fmt.Sprint(rMap)
+	assert.Equal(t, "map[age:30 intVal:123 value:3]", rString)
+
+	user = User{}
+	err := FromMapN(rMap, &user, false)
+	assert.Nil(t, err)
+	assert.Equal(t, 123, user.IntVal)
 }
