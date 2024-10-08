@@ -41,13 +41,14 @@ func WrappedPost[I any, O any](client *resty.Client, input I, url string) (O, *d
 	in := access.ParaIn[I]{Data: input}
 	_, err := client.R().SetBody(in).SetResult(&rtn).Post(url)
 	if err != nil {
-		zap.L().Warn(err.Error(), zap.String("url", url))
 		msg := fmt.Sprintf("%s%s %s%s", client.BaseURL, url, def.ENV_M, err.Error())
+		zap.L().Warn(msg)
 		customError := def.NewCustomError(def.ET_ENV, def.ENV_C, msg, nil)
 		return rtn.Data, customError
 	}
 	if rtn.State < 0 || rtn.State > 0 {
-		zap.L().Warn(rtn.ErrMsg, zap.String("url", url))
+		msg := fmt.Sprintf("%s%s %s%s", client.BaseURL, url, def.ENV_M, rtn.ErrMsg)
+		zap.L().Warn(msg)
 		return rtn.Data, rtn.ToCustomError()
 	}
 	return rtn.Data, nil
