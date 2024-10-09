@@ -20,7 +20,7 @@ type Auth struct {
 	TenantId int    `json:"tenantId,omitempty"` // 授权验证用于那个租户,缺省为0，用户登录时可缓存于客户端。
 	UId      int    `json:"uId,omitempty"`      // 资源的使用者，安全网关会重置此字段
 	RoleId   int    `json:"roleId,omitempty"`   // 要操作的角色，要操作的角色
-	Domain   string `json:"domain,omitempty"`   // 要验证的领域
+	DomainId int    `json:"domainId,omitempty"` // 要验证的领域Id
 	Operate  string `json:"operate,omitempty"`  // 要对领域进行的操作
 }
 
