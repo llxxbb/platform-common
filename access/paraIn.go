@@ -16,10 +16,11 @@ type ParaIn[T any] struct {
 }
 
 type Auth struct {
-	SysId   int    `json:"sysId,omitempty"`   // 授权验证用于那个系统
-	RoleId  int    `json:"roleId,omitempty"`  // 要操作的角色
-	Domain  string `json:"domain,omitempty"`  // 要验证的领域
-	Operate string `json:"operate,omitempty"` // 要对领域进行的操作
+	SysId    int    `json:"sysId,omitempty"`   // 授权验证用于那个系统
+	TenantId int    `json:"tenantId"`          // 授权验证用于那个租户,缺省为0
+	RoleId   int    `json:"roleId,omitempty"`  // 要操作的角色
+	Domain   string `json:"domain,omitempty"`  // 要验证的领域
+	Operate  string `json:"operate,omitempty"` // 要对领域进行的操作
 }
 
 func CreateFrom[T any](data T) ParaIn[T] {
