@@ -6,8 +6,10 @@ import (
 	pphttp "github.com/pinpoint-apm/pinpoint-go-agent/plugin/http"
 	"gitlab.cdel.local/platform/go/platform-common/access"
 	"gitlab.cdel.local/platform/go/platform-common/def"
+	"gitlab.cdel.local/platform/go/platform-common/old"
 	"go.uber.org/zap"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -52,4 +54,23 @@ func WrappedPost[I any, O any](client *resty.Client, input I, url string) (O, *d
 		return rtn.Data, rtn.ToCustomError()
 	}
 	return rtn.Data, nil
+}
+
+func WrappedPostOld[I any, O any](client *resty.Client, input I, url string) (O, *def.CustomError) {
+	var rtn = old.ServiceResult[O]{}
+	in := old.Request[I]{Params: input}
+	_, err := client.R().SetBody(in).SetResult(&rtn).Post(url)
+	if err != nil {
+		msg := fmt.Sprintf("%s%s %s%s", client.BaseURL, url, def.ENV_M, err.Error())
+		zap.L().Warn(msg)
+		customError := def.NewCustomError(def.ET_ENV, def.ENV_C, msg, nil)
+		return rtn.Result, customError
+	}
+	if !rtn.Success {
+		msg := fmt.Sprintf("%s%s %s %s%s", client.BaseURL, url, rtn.ErrorCode, def.ENV_M, rtn.ErrorMsg)
+		zap.L().Warn(msg)
+		atoi, _ := strconv.Atoi(rtn.ErrorCode)
+		return rtn.Result, def.NewCustomError(def.ET_ENV, atoi, rtn.ErrorMsg, nil)
+	}
+	return rtn.Result, nil
 }
