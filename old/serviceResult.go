@@ -1,6 +1,9 @@
 package old
 
-import "gitlab.cdel.local/platform/go/platform-common/def"
+import (
+	"context"
+	"gitlab.cdel.local/platform/go/platform-common/def"
+)
 
 type ServiceResult[T any] struct {
 	Success   bool   `json:"success"`
@@ -34,6 +37,22 @@ func GetResultWithParam[P any, T any](p P, fn func(p P) (T, *def.CustomError)) *
 		return GetErrorResultD[T](def.ET_SYS, def.E_UNKNOWN.Code, msg, nil)
 	}
 	t, e := fn(p)
+	if e != nil {
+		return GetErrorResult[T](e)
+	}
+	return GetSuccessResult(t)
+}
+
+// GetResultByParaCtx
+//
+//	execute the fun by param and Context and automatically return the result whether an Exception in there.
+//	all so with log.
+func GetResultByParaCtx[P any, T any](c context.Context, p P, fn func(c context.Context, p P) (T, *def.CustomError)) *ServiceResult[T] {
+	if fn == nil {
+		msg := def.E_UNKNOWN.Msg + "The param [fn] doesn't provide"
+		return GetErrorResultD[T](def.ET_SYS, def.E_UNKNOWN.Code, msg, nil)
+	}
+	t, e := fn(c, p)
 	if e != nil {
 		return GetErrorResult[T](e)
 	}
