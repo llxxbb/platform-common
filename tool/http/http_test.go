@@ -53,6 +53,16 @@ func Test_WrappedPost_returnErr(t *testing.T) {
 	assert.Equal(t, "you get an err", err.Msg)
 }
 
+func Test_WrappedPost_Raw(t *testing.T) {
+	gock.New("").
+		Post("/subUrl").
+		Reply(http.StatusOK).
+		JSON([]string{"hello"})
+	rtn, err := WrappedPostRaw[string, []string](client, "prj", "/subUrl")
+	assert.Nil(t, err)
+	assert.Equal(t, "hello", rtn[0])
+}
+
 func Test_WrappedPost_returnOk(t *testing.T) {
 	gock.New("").
 		Post("/subUrl").

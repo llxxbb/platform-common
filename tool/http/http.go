@@ -74,3 +74,16 @@ func WrappedPostOld[I any, O any](client *resty.Client, input I, url string) (O,
 	}
 	return rtn.Result, nil
 }
+
+func WrappedPostRaw[I any, O any](client *resty.Client, input I, url string) (O, *def.CustomError) {
+	var rtn O
+	_, err := client.R().SetBody(input).SetResult(&rtn).Post(url)
+	if err != nil {
+		msg := fmt.Sprintf("%s%s %s%s", client.BaseURL, url, def.ENV_M, err.Error())
+		zap.L().Warn(msg)
+		customError := def.NewCustomError(def.ET_ENV, def.ENV_C, msg, nil)
+		return rtn, customError
+	}
+	return rtn, nil
+
+}
