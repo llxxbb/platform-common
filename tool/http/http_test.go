@@ -1,12 +1,13 @@
 package http
 
 import (
-	"github.com/h2non/gock"
-	"github.com/stretchr/testify/assert"
-	"gitlab.cdel.local/platform/go/platform-common/access"
-	"gitlab.cdel.local/platform/go/platform-common/def"
 	"net/http"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/llxxbb/platform-common/access"
+	"github.com/llxxbb/platform-common/def"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Post_envErr(t *testing.T) {

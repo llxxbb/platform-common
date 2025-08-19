@@ -3,8 +3,8 @@ package access
 import (
 	"testing"
 
+	"github.com/llxxbb/platform-common/def"
 	"github.com/stretchr/testify/assert"
-	"gitlab.cdel.local/platform/go/platform-common/def"
 )
 
 func TestConvert(t *testing.T) {

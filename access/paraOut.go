@@ -2,7 +2,8 @@ package access
 
 import (
 	"context"
-	"gitlab.cdel.local/platform/go/platform-common/def"
+
+	"github.com/llxxbb/platform-common/def"
 )
 
 type ParaOut[T any] struct {

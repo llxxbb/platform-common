@@ -2,7 +2,8 @@ package old
 
 import (
 	"context"
-	"gitlab.cdel.local/platform/go/platform-common/def"
+
+	"github.com/llxxbb/platform-common/def"
 )
 
 type ServiceResult[T any] struct {

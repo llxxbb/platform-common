@@ -2,15 +2,16 @@ package http
 
 import (
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	pphttp "github.com/pinpoint-apm/pinpoint-go-agent/plugin/http"
-	"gitlab.cdel.local/platform/go/platform-common/access"
-	"gitlab.cdel.local/platform/go/platform-common/def"
-	"gitlab.cdel.local/platform/go/platform-common/old"
-	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/llxxbb/platform-common/access"
+	"github.com/llxxbb/platform-common/def"
+	"github.com/llxxbb/platform-common/old"
+	pphttp "github.com/pinpoint-apm/pinpoint-go-agent/plugin/http"
+	"go.uber.org/zap"
 )
 
 func RpcClient(timeOut int, baseUrl string) *resty.Client {

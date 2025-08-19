@@ -1,7 +1,7 @@
 package access
 
 import (
-	"gitlab.cdel.local/platform/go/platform-common/def"
+	"github.com/llxxbb/platform-common/def"
 )
 
 type ParaIn[T any] struct {

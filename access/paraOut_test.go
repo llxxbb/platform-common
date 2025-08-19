@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/llxxbb/platform-common/def"
 	"github.com/stretchr/testify/assert"
-	"gitlab.cdel.local/platform/go/platform-common/def"
 )
 
 func TestGetResult_Ok(t *testing.T) {

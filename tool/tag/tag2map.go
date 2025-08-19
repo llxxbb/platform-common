@@ -2,10 +2,11 @@ package tag
 
 import (
 	"fmt"
-	"gitlab.cdel.local/platform/go/platform-common/def"
-	"go.uber.org/zap"
 	"reflect"
 	"strconv"
+
+	"github.com/llxxbb/platform-common/def"
+	"go.uber.org/zap"
 )
 
 var mapTag = "map"
